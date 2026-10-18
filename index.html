@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calcolatore professionale per conversioni vettoriali AC - I.S.I.S. A. Malignani">
+    <meta name="theme-color" content="#217346">
+    <title>AC Calculator - Conversione Vettori</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.svg">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            background: #f0f0f0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .excel-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* HEADER STILE EXCEL */
+        .excel-header {
+            background: #217346;
+            color: white;
+            padding: 20px 30px;
+            border-bottom: 3px solid #1e6239;
+        }
+
+        .excel-header h1 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .excel-header p {
+            font-size: 1em;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        /* TABS STILE EXCEL */
+        .excel-tabs {
+            display: flex;
+            background: #f9f9f9;
+            border-bottom: 2px solid #d1d1d1;
+            overflow-x: auto;
+            padding: 0 20px;
+        }
+
+        .excel-tab {
+            padding: 12px 25px;
+            background: #e7e6e6;
+            border: 1px solid #d1d1d1;
+            border-bottom: none;
+            margin-right: 3px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #444;
+            transition: all 0.2s;
+            border-radius: 4px 4px 0 0;
+            white-space: nowrap;
+        }
+
+        .excel-tab:hover {
+            background: #f0f0f0;
+        }
+
+        .excel-tab.active {
+            background: white;
+            color: #217346;
+            border-bottom: 2px solid white;
+            position: relative;
+            top: 2px;
+        }
+
+        /* CONTENT AREA */
+        .excel-content {
+            display: none;
+            padding: 30px;
+            background: white;
+        }
+
+        .excel-content.active {
+            display: block;
+        }
+
+        /* TABELLE STILE EXCEL */
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background: white;
+            border: 1px solid #d1d1d1;
+        }
+
+        .excel-table th {
+            background: #4472c4;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #2f5597;
+            font-size: 0.95em;
+        }
+
+        .excel-table td {
+            padding: 10px 12px;
+            border: 1px solid #d1d1d1;
+            font-size: 0.95em;
+        }
+
+        .excel-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .excel-table tr:hover {
+            background: #e7e6e6;
+        }
+
+        /* CELLE INPUT/OUTPUT */
+        .cell-label {
+            background: #e7e6e6;
+            font-weight: 600;
+            color: #444;
+            width: 200px;
+        }
+
+        .cell-input {
+            background: #fff2cc;
+            border-left: 3px solid #ffc000 !important;
+        }
+
+        .cell-input input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d1d1;
+            font-size: 1em;
+            font-family: 'Calibri', Arial;
+            background: white;
+        }
+
+        .cell-input input:focus {
+            outline: 2px solid #217346;
+            border-color: #217346;
+        }
+
+        .cell-output {
+            background: #f2f2f2;
+            font-weight: 600;
+            color: #217346;
+            font-size: 1.15em;
+            border-left: 3px solid #217346 !important;
+            min-height: 40px;
+        }
+
+        .cell-formula {
+            background: #deebf7;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #1f4e78;
+        }
+
+        /* INFO ICON STILE EXCEL */
+        .info-btn {
+            background: #4472c4;
+            color: white;
+            border: 2px solid #2f5597;
+            padding: 4px 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 700;
+            margin-left: 10px;
+            transition: all 0.3s;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-style: italic;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .info-btn:hover {
+            background: #2f5597;
+            transform: scale(1.1);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+
+        /* SECTION HEADERS */
+        .section-header {
+            background: #4472c4;
+            color: white;
+            padding: 15px 20px;
+            margin: 25px 0 15px 0;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-left: 5px solid #2f5597;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* MODAL STILE EXCEL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 3% auto;
+            width: 90%;
+            max-width: 700px;
+            border: 2px solid #4472c4;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: #4472c4;
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0 10px;
+        }
+
+        .modal-close:hover {
+            color: #e7e6e6;
+        }
+
+        .modal-body {
+            padding: 25px;
+            max-height: 70vh;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .modal-body h3 {
+            color: #217346;
+            margin-top: 20px;
+            margin-bottom: 12px;
+            font-size: 1.2em;
+            border-bottom: 2px solid #217346;
+            padding-bottom: 5px;
+        }
+
+        .modal-body .formula-box {
+            background: #fff2cc;
+            border-left: 4px solid #ffc000;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+        }
+
+        .modal-body .example-box {
+            background: #e7e6e6;
+            border-left: 4px solid #217346;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .modal-body .example-title {
+            font-weight: 600;
+            color: #217346;
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+
+        /* GRID LAYOUT PER OPERAZIONI */
+        .operations-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        @media (min-width: 1200px) {
+            .operations-grid {
+                gap: 30px;
+            }
+        }
+
+        .operation-box {
+            border: 2px solid #d1d1d1;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+        
+        .operation-box:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .operation-header {
+            background: #70ad47;
+            color: white;
+            padding: 14px 18px;
+            font-weight: 600;
+            font-size: 1.1em;
+            border-bottom: 3px solid #5a8f39;
+        }
+
+        .operation-content {
+            padding: 18px;
+        }
+        
+        .operation-content .excel-table {
+            margin-bottom: 0;
+        }
+
+        /* UNIT SELECTOR STILE EXCEL */
+        .unit-selector {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .unit-option {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 15px;
+            border: 2px solid #d1d1d1;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .unit-option:hover {
+            background: #f9f9f9;
+            border-color: #4472c4;
+        }
+
+        .unit-option input[type="radio"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        .unit-option.selected {
+            background: #4472c4;
+            color: white;
+            border-color: #2f5597;
+            font-weight: 600;
+        }
+
+        /* QUADRANT BADGE */
+        .quadrant-badge {
+            display: inline-block;
+            padding: 6px 15px;
+            background: #70ad47;
+            color: white;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .excel-header {
+                padding: 15px 20px;
+            }
+
+            .excel-header h1 {
+                font-size: 1.4em;
+            }
+
+            .excel-tabs {
+                padding: 0 10px;
+            }
+
+            .excel-tab {
+                padding: 10px 15px;
+                font-size: 0.85em;
+            }
+
+            .excel-content {
+                padding: 15px;
+            }
+
+            .excel-table {
+                font-size: 0.85em;
+            }
+
+            .cell-label {
+                width: 150px;
+            }
+
+            .section-header {
+                font-size: 1em;
+                padding: 12px 15px;
+            }
+
+            .operations-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+
+            .modal-body {
+                padding: 20px 15px;
+            }
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4472c4;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2f5597;
+        }
+
+        /* FOOTER */
+        .excel-footer {
+            background: #217346;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-top: 3px solid #1e6239;
+        }
+    </style>
+</head>
+<body>
+    <div class="excel-container">
+        <!-- HEADER -->
+        <div class="excel-header">
+            <h1>Conversione Vettori AC - Elettrotecnica</h1>
+            <p>Strumento professionale per calcoli di corrente alternata</p>
+        </div>
+
+        <!-- TABS -->
+        <div class="excel-tabs">
+            <div class="excel-tab active" onclick="switchTab('cart')">Cartesiana → Polare</div>
+            <div class="excel-tab" onclick="switchTab('polar')">Polare → Cartesiana</div>
+            <div class="excel-tab" onclick="switchTab('imp')">Impedenze</div>
+            <div class="excel-tab" onclick="switchTab('react')">Reattanze</div>
+            <div class="excel-tab" onclick="switchTab('lc')">L e C</div>
+            <div class="excel-tab" onclick="switchTab('star')">Stella-Triangolo</div>
+        </div>
+
+        <!-- MODALS -->
+        <div id="modalInfo" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Informazioni</h2>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+            </div>
+        </div>
+
+        <!-- TAB 1: CARTESIANA → POLARE -->
+        <div id="cart" class="excel-content active">
+            <div class="section-header">
+                Conversione da Forma Cartesiana a Forma Polare
+                <button class="info-btn" onclick="showInfo('cart')">i</button>
+            </div>
+
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th>Parametro</th>
+                        <th>Vettore 1</th>
+                        <th>Vettore 2</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="cell-label">Parte Reale (a)</td>
+                        <td class="cell-input"><input type="number" id="c1_r" value="0" step="any" oninput="calcCart()"></td>
+                        <td class="cell-input"><input type="number" id="c2_r" value="0" step="any" oninput="calcCart()"></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Parte Immaginaria (b)</td>
+                        <td class="cell-input"><input type="number" id="c1_i" value="0" step="any" oninput="calcCart()"></td>
+                        <td class="cell-input"><input type="number" id="c2_i" value="0" step="any" oninput="calcCart()"></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Modulo (ρ)</td>
+                        <td class="cell-output" id="c1_mod">0</td>
+                        <td class="cell-output" id="c2_mod">0</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Fase (φ) [gradi]</td>
+                        <td class="cell-output" id="c1_ph">0°</td>
+                        <td class="cell-output" id="c2_ph">0°</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Quadrante</td>
+                        <td class="cell-output"><span class="quadrant-badge" id="c1_q">-</span></td>
+                        <td class="cell-output"><span class="quadrant-badge" id="c2_q">-</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-formula" colspan="3">Formula: ρ = √(a² + b²), φ = arctan(b/a)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="section-header">
+                Operazioni tra Vettori
+            </div>
+
+            <div class="operations-grid">
+                <div class="operation-box">
+                    <div class="operation-header">SOMMA</div>
+                    <div class="operation-content">
+                        <table class="excel-table">
+                            <tr><td class="cell-label">Reale</td><td class="cell-output" id="c_sum_r">0</td></tr>
+                            <tr><td class="cell-label">Immaginario</td><td class="cell-output" id="c_sum_i">0</td></tr>
+                            <tr><td class="cell-label">Modulo</td><td class="cell-output" id="c_sum_m">0</td></tr>
+                            <tr><td class="cell-label">Fase</td><td class="cell-output" id="c_sum_p">0°</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="operation-box">
+                    <div class="operation-header">SOTTRAZIONE</div>
+                    <div class="operation-content">
+                        <table class="excel-table">
+                            <tr><td class="cell-label">Reale</td><td class="cell-output" id="c_sub_r">0</td></tr>
+                            <tr><td class="cell-label">Immaginario</td><td class="cell-output" id="c_sub_i">0</td></tr>
+                            <tr><td class="cell-label">Modulo</td><td class="cell-output" id="c_sub_m">0</td></tr>
+                            <tr><td class="cell-label">Fase</td><td class="cell-output" id="c_sub_p">0°</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="operation-box">
+                    <div class="operation-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>PRODOTTO</span>
+                        <button class="info-btn" style="margin: 0; font-size: 0.85em; width: 24px; height: 24px;" onclick="showInfo('mul')">i</button>
+                    </div>
+                    <div class="operation-content">
+                        <table class="excel-table">
+                            <tr><td class="cell-label">Reale</td><td class="cell-output" id="c_mul_r">0</td></tr>
+                            <tr><td class="cell-label">Immaginario</td><td class="cell-output" id="c_mul_i">0</td></tr>
+                            <tr><td class="cell-label">Modulo</td><td class="cell-output" id="c_mul_m">0</td></tr>
+                            <tr><td class="cell-label">Fase</td><td class="cell-output" id="c_mul_p">0°</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="operation-box">
+                    <div class="operation-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>DIVISIONE</span>
+                        <button class="info-btn" style="margin: 0; font-size: 0.85em; width: 24px; height: 24px;" onclick="showInfo('div')">i</button>
+                    </div>
+                    <div class="operation-content">
+                        <table class="excel-table">
+                            <tr><td class="cell-label">Reale</td><td class="cell-output" id="c_div_r">0</td></tr>
+                            <tr><td class="cell-label">Immaginario</td><td class="cell-output" id="c_div_i">0</td></tr>
+                            <tr><td class="cell-label">Modulo</td><td class="cell-output" id="c_div_m">0</td></tr>
+                            <tr><td class="cell-label">Fase</td><td class="cell-output" id="c_div_p">0°</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: POLARE → CARTESIANA -->
+        <div id="polar" class="excel-content">
+            <div class="section-header">
+                Conversione da Forma Polare a Forma Cartesiana
+                <button class="info-btn" onclick="showInfo('polar')">i</button>
+            </div>
+
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th>Parametro</th>
+                        <th>Vettore 1</th>
+                        <th>Vettore 2</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="cell-label">Modulo (ρ)</td>
+                        <td class="cell-input"><input type="number" id="p1_mod" value="0" step="any" oninput="calcPolar()"></td>
+                        <td class="cell-input"><input type="number" id="p2_mod" value="0" step="any" oninput="calcPolar()"></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Fase (φ) [gradi]</td>
+                        <td class="cell-input"><input type="number" id="p1_ph" value="0" step="any" oninput="calcPolar()"></td>
+                        <td class="cell-input"><input type="number" id="p2_ph" value="0" step="any" oninput="calcPolar()"></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Parte Reale (a)</td>
+                        <td class="cell-output" id="p1_r">0</td>
+                        <td class="cell-output" id="p2_r">0</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Parte Immaginaria (b)</td>
+                        <td class="cell-output" id="p1_i">0</td>
+                        <td class="cell-output" id="p2_i">0</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Quadrante</td>
+                        <td class="cell-output"><span class="quadrant-badge" id="p1_q">-</span></td>
+                        <td class="cell-output"><span class="quadrant-badge" id="p2_q">-</span></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-formula" colspan="3">Formula: a = ρ×cos(φ), b = ρ×sin(φ)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="section-header">Operazioni tra Vettori</div>
+
+            <div class="operations-grid">
+                <div class="operation-box">
+                    <div class="operation-header">SOMMA</div>
+                    <div class="operation-content">
+                        <table class="excel-table">
+                            <tr><td class="cell-label">Reale</td><td class="cell-output" id="p_sum_r">0</td></tr>
+                            <tr><td class="cell-label">Immaginario</td><td class="cell-output" id="p_sum_i">0</td></tr>
+                            <tr><td class="cell-label">Modulo</td><td class="cell-output" id="p_sum_m">0</td></tr>
+                            <tr><td class="cell-label">Fase</td><td class="cell-output" id="p_sum_p">0°</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="operation-box">
+                    <div class="operation-header">SOTTRAZIONE</div>
+                    <div class="operation-content">
+                        <table class="excel-table">
+                            <tr><td class="cell-label">Reale</td><td class="cell-output" id="p_sub_r">0</td></tr>
+                            <tr><td class="cell-label">Immaginario</td><td class="cell-output" id="p_sub_i">0</td></tr>
+                            <tr><td class="cell-label">Modulo</td><td class="cell-output" id="p_sub_m">0</td></tr>
+                            <tr><td class="cell-label">Fase</td><td class="cell-output" id="p_sub_p">0°</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="operation-box">
+                    <div class="operation-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>PRODOTTO</span>
+                        <button class="info-btn" style="margin: 0; font-size: 0.85em; width: 24px; height: 24px;" onclick="showInfo('mul')">i</button>
+                    </div>
+                    <div class="operation-content">
+                        <table class="excel-table">
+                            <tr><td class="cell-label">Reale</td><td class="cell-output" id="p_mul_r">0</td></tr>
+                            <tr><td class="cell-label">Immaginario</td><td class="cell-output" id="p_mul_i">0</td></tr>
+                            <tr><td class="cell-label">Modulo</td><td class="cell-output" id="p_mul_m">0</td></tr>
+                            <tr><td class="cell-label">Fase</td><td class="cell-output" id="p_mul_p">0°</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="operation-box">
+                    <div class="operation-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>DIVISIONE</span>
+                        <button class="info-btn" style="margin: 0; font-size: 0.85em; width: 24px; height: 24px;" onclick="showInfo('div')">i</button>
+                    </div>
+                    <div class="operation-content">
+                        <table class="excel-table">
+                            <tr><td class="cell-label">Reale</td><td class="cell-output" id="p_div_r">0</td></tr>
+                            <tr><td class="cell-label">Immaginario</td><td class="cell-output" id="p_div_i">0</td></tr>
+                            <tr><td class="cell-label">Modulo</td><td class="cell-output" id="p_div_m">0</td></tr>
+                            <tr><td class="cell-label">Fase</td><td class="cell-output" id="p_div_p">0°</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: IMPEDENZE -->
+        <div id="imp" class="excel-content">
+            <div class="section-header">
+                Calcolo Impedenze Serie e Parallelo
+                <button class="info-btn" onclick="showInfo('imp')">i</button>
+            </div>
+
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th>Parametro</th>
+                        <th>Z₁</th>
+                        <th>Z₂</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="cell-label">Resistenza (R) [Ω]</td>
+                        <td class="cell-input"><input type="number" id="z1_r" value="0" step="any" oninput="calcImp()"></td>
+                        <td class="cell-input"><input type="number" id="z2_r" value="0" step="any" oninput="calcImp()"></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Reattanza (X) [Ω]</td>
+                        <td class="cell-input"><input type="number" id="z1_x" value="0" step="any" oninput="calcImp()"></td>
+                        <td class="cell-input"><input type="number" id="z2_x" value="0" step="any" oninput="calcImp()"></td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">|Z| [Ω]</td>
+                        <td class="cell-output" id="z1_mod">0</td>
+                        <td class="cell-output" id="z2_mod">0</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">φ [gradi]</td>
+                        <td class="cell-output" id="z1_ph">0°</td>
+                        <td class="cell-output" id="z2_ph">0°</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-formula" colspan="3">Z = R + jX</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="operations-grid">
+                <div class="operation-box">
+                    <div class="operation-header">Impedenza SERIE (Zs)</div>
+                    <div class="operation-content">
+                        <table class="excel-table">
+                            <tr><td class="cell-label">Rs [Ω]</td><td class="cell-output" id="zs_r">0</td></tr>
+                            <tr><td class="cell-label">Xs [Ω]</td><td class="cell-output" id="zs_x">0</td></tr>
+                            <tr><td class="cell-label">|Zs| [Ω]</td><td class="cell-output" id="zs_mod">0</td></tr>
+                            <tr><td class="cell-label">φs [°]</td><td class="cell-output" id="zs_ph">0°</td></tr>
+                            <tr><td class="cell-formula" colspan="2">Zs = Z₁ + Z₂</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="operation-box">
+                    <div class="operation-header">Impedenza PARALLELO (Zp)</div>
+                    <div class="operation-content">
+                        <table class="excel-table">
+                            <tr><td class="cell-label">Rp [Ω]</td><td class="cell-output" id="zp_r">0</td></tr>
+                            <tr><td class="cell-label">Xp [Ω]</td><td class="cell-output" id="zp_x">0</td></tr>
+                            <tr><td class="cell-label">|Zp| [Ω]</td><td class="cell-output" id="zp_mod">0</td></tr>
+                            <tr><td class="cell-label">φp [°]</td><td class="cell-output" id="zp_ph">0°</td></tr>
+                            <tr><td class="cell-formula" colspan="2">Zp = (Z₁×Z₂)/(Z₁+Z₂)</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: REATTANZE -->
+        <div id="react" class="excel-content">
+            <div class="section-header">
+                Calcolo Reattanze Induttive e Capacitive
+                <button class="info-btn" onclick="showInfo('react')">i</button>
+            </div>
+
+            <div class="operation-box" style="margin-bottom: 20px;">
+                <div class="operation-header">Reattanza Induttiva XL</div>
+                <div class="operation-content">
+                    <div class="unit-selector">
+                        <label class="unit-option selected"><input type="radio" name="l_unit" value="H" checked onchange="calcReact()"> H (Henry)</label>
+                        <label class="unit-option"><input type="radio" name="l_unit" value="mH" onchange="calcReact()"> mH</label>
+                        <label class="unit-option"><input type="radio" name="l_unit" value="µH" onchange="calcReact()"> µH</label>
+                    </div>
+                    <table class="excel-table">
+                        <tr><td class="cell-label">Induttanza (L)</td><td class="cell-input"><input type="number" id="L_val" value="0" step="any" oninput="calcReact()"></td></tr>
+                        <tr><td class="cell-label">Frequenza (f) [Hz]</td><td class="cell-input"><input type="number" id="f_xl" value="50" step="any" oninput="calcReact()"></td></tr>
+                        <tr><td class="cell-label">XL [Ω]</td><td class="cell-output" id="xl_res">0</td></tr>
+                        <tr><td class="cell-label">ω [rad/s]</td><td class="cell-output" id="omega_xl">0</td></tr>
+                        <tr><td class="cell-formula" colspan="2">XL = 2πfL = ωL</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="operation-box">
+                <div class="operation-header">Reattanza Capacitiva XC</div>
+                <div class="operation-content">
+                    <div class="unit-selector">
+                        <label class="unit-option"><input type="radio" name="c_unit" value="F" onchange="calcReact()"> F (Farad)</label>
+                        <label class="unit-option"><input type="radio" name="c_unit" value="mF" onchange="calcReact()"> mF</label>
+                        <label class="unit-option selected"><input type="radio" name="c_unit" value="µF" checked onchange="calcReact()"> µF</label>
+                        <label class="unit-option"><input type="radio" name="c_unit" value="nF" onchange="calcReact()"> nF</label>
+                        <label class="unit-option"><input type="radio" name="c_unit" value="pF" onchange="calcReact()"> pF</label>
+                    </div>
+                    <table class="excel-table">
+                        <tr><td class="cell-label">Capacità (C)</td><td class="cell-input"><input type="number" id="C_val" value="0" step="any" oninput="calcReact()"></td></tr>
+                        <tr><td class="cell-label">Frequenza (f) [Hz]</td><td class="cell-input"><input type="number" id="f_xc" value="50" step="any" oninput="calcReact()"></td></tr>
+                        <tr><td class="cell-label">XC [Ω]</td><td class="cell-output" id="xc_res">0</td></tr>
+                        <tr><td class="cell-label">ω [rad/s]</td><td class="cell-output" id="omega_xc">0</td></tr>
+                        <tr><td class="cell-formula" colspan="2">XC = 1/(2πfC) = 1/(ωC)</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: L E C -->
+        <div id="lc" class="excel-content">
+            <div class="section-header">
+                Calcolo Induttanze L e Capacità C
+                <button class="info-btn" onclick="showInfo('lc')">i</button>
+            </div>
+
+            <div class="operation-box" style="margin-bottom: 20px;">
+                <div class="operation-header">Calcolo Induttanza L</div>
+                <div class="operation-content">
+                    <div class="unit-selector">
+                        <label class="unit-option selected"><input type="radio" name="l_out_unit" value="H" checked onchange="calcLC()"> H</label>
+                        <label class="unit-option"><input type="radio" name="l_out_unit" value="mH" onchange="calcLC()"> mH</label>
+                        <label class="unit-option"><input type="radio" name="l_out_unit" value="µH" onchange="calcLC()"> µH</label>
+                    </div>
+                    <table class="excel-table">
+                        <tr><td class="cell-label">XL [Ω]</td><td class="cell-input"><input type="number" id="xl_in" value="0" step="any" oninput="calcLC()"></td></tr>
+                        <tr><td class="cell-label">Frequenza (f) [Hz]</td><td class="cell-input"><input type="number" id="f_l" value="50" step="any" oninput="calcLC()"></td></tr>
+                        <tr><td class="cell-label">Induttanza L</td><td class="cell-output" id="l_res">0</td></tr>
+                        <tr><td class="cell-label">ω [rad/s]</td><td class="cell-output" id="omega_l">0</td></tr>
+                        <tr><td class="cell-formula" colspan="2">L = XL/(2πf) = XL/ω</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="operation-box">
+                <div class="operation-header">Calcolo Capacità C</div>
+                <div class="operation-content">
+                    <div class="unit-selector">
+                        <label class="unit-option"><input type="radio" name="c_out_unit" value="F" onchange="calcLC()"> F</label>
+                        <label class="unit-option"><input type="radio" name="c_out_unit" value="mF" onchange="calcLC()"> mF</label>
+                        <label class="unit-option selected"><input type="radio" name="c_out_unit" value="µF" checked onchange="calcLC()"> µF</label>
+                        <label class="unit-option"><input type="radio" name="c_out_unit" value="nF" onchange="calcLC()"> nF</label>
+                        <label class="unit-option"><input type="radio" name="c_out_unit" value="pF" onchange="calcLC()"> pF</label>
+                    </div>
+                    <table class="excel-table">
+                        <tr><td class="cell-label">XC [Ω]</td><td class="cell-input"><input type="number" id="xc_in" value="0" step="any" oninput="calcLC()"></td></tr>
+                        <tr><td class="cell-label">Frequenza (f) [Hz]</td><td class="cell-input"><input type="number" id="f_c" value="50" step="any" oninput="calcLC()"></td></tr>
+                        <tr><td class="cell-label">Capacità C</td><td class="cell-output" id="c_res">0</td></tr>
+                        <tr><td class="cell-label">ω [rad/s]</td><td class="cell-output" id="omega_c">0</td></tr>
+                        <tr><td class="cell-formula" colspan="2">C = 1/(2πfXC) = 1/(ωXC)</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: STELLA-TRIANGOLO -->
+        <div id="star" class="excel-content">
+            <div class="section-header">
+                Conversione Stella (Y) → Triangolo (Δ)
+                <button class="info-btn" onclick="showInfo('star')">i</button>
+            </div>
+
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th>Impedenze Stella (Y)</th>
+                        <th>Reale (R) [Ω]</th>
+                        <th>Immaginaria (X) [Ω]</th>
+                        <th>|Z| [Ω]</th>
+                        <th>φ [°]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="cell-label">Zy₁</td>
+                        <td class="cell-input"><input type="number" id="zy1_r" value="0" step="any" oninput="calcStar()"></td>
+                        <td class="cell-input"><input type="number" id="zy1_x" value="0" step="any" oninput="calcStar()"></td>
+                        <td class="cell-output" id="zy1_mod">0</td>
+                        <td class="cell-output" id="zy1_ph">0°</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Zy₂</td>
+                        <td class="cell-input"><input type="number" id="zy2_r" value="0" step="any" oninput="calcStar()"></td>
+                        <td class="cell-input"><input type="number" id="zy2_x" value="0" step="any" oninput="calcStar()"></td>
+                        <td class="cell-output" id="zy2_mod">0</td>
+                        <td class="cell-output" id="zy2_ph">0°</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Zy₃</td>
+                        <td class="cell-input"><input type="number" id="zy3_r" value="0" step="any" oninput="calcStar()"></td>
+                        <td class="cell-input"><input type="number" id="zy3_x" value="0" step="any" oninput="calcStar()"></td>
+                        <td class="cell-output" id="zy3_mod">0</td>
+                        <td class="cell-output" id="zy3_ph">0°</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="section-header" style="margin-top: 30px;">Risultati - Impedenze Triangolo (Δ)</div>
+
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th>Impedenze Triangolo (Δ)</th>
+                        <th>Reale (R) [Ω]</th>
+                        <th>Immaginaria (X) [Ω]</th>
+                        <th>|Z| [Ω]</th>
+                        <th>φ [°]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="cell-label">Zd₁</td>
+                        <td class="cell-output" id="zd1_r">0</td>
+                        <td class="cell-output" id="zd1_x">0</td>
+                        <td class="cell-output" id="zd1_mod">0</td>
+                        <td class="cell-output" id="zd1_ph">0°</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Zd₂</td>
+                        <td class="cell-output" id="zd2_r">0</td>
+                        <td class="cell-output" id="zd2_x">0</td>
+                        <td class="cell-output" id="zd2_mod">0</td>
+                        <td class="cell-output" id="zd2_ph">0°</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-label">Zd₃</td>
+                        <td class="cell-output" id="zd3_r">0</td>
+                        <td class="cell-output" id="zd3_x">0</td>
+                        <td class="cell-output" id="zd3_mod">0</td>
+                        <td class="cell-output" id="zd3_ph">0°</td>
+                    </tr>
+                    <tr>
+                        <td class="cell-formula" colspan="5">Formula: Zd = (Zy₁×Zy₂ + Zy₂×Zy₃ + Zy₃×Zy₁) / Zy_opposto</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="excel-footer">
+            <p><strong>Calcolatore Vettori AC - Elettrotecnica | Istituto Malignani</strong></p>
+            <p style="margin-top: 8px; opacity: 0.9;">Formule verificate e conformi agli standard didattici</p>
+            <p style="margin-top: 12px; font-size: 0.9em; opacity: 0.85;">© 2026 - Creato con ❤️ da Jarod</p>
+        </div>
+    </div>
+
+    <script>
+        // UTILITY FUNCTIONS
+        function round(n, d=6) { return Math.round(n * Math.pow(10,d)) / Math.pow(10,d); }
+        function sign(n) { return n > 0 ? 1 : (n < 0 ? -1 : 0); }
+        function getQuad(r, i) {
+            const sr = sign(r), si = sign(i), sum = sr + si;
+            if (sum > 0) return 1;
+            if (sum < 0) return 3;
+            return (sum + sr > 0) ? 4 : 2;
+        }
+        function cart2pol(r, i) {
+            const mod = Math.sqrt(r*r + i*i);
+            let ph = 0;
+            if (r === 0) ph = i > 0 ? 90 : -90;
+            else {
+                const q = getQuad(r, i);
+                const atan = Math.atan(i/r) * 180 / Math.PI;
+                ph = (q === 2 || q === 3) ? atan + 180 : atan;
+            }
+            return {mod: round(mod), ph: round(ph)};
+        }
+        function pol2cart(mod, ph) {
+            const rad = ph * Math.PI / 180;
+            return {r: round(mod * Math.cos(rad)), i: round(mod * Math.sin(rad))};
+        }
+        function set(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        }
+
+        // TAB SWITCHING
+        function switchTab(tab) {
+            document.querySelectorAll('.excel-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.excel-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.excel-tab[onclick*="${tab}"]`).classList.add('active');
+            document.getElementById(tab).classList.add('active');
+        }
+
+        // UNIT SELECTOR
+        document.querySelectorAll('.unit-selector').forEach(selector => {
+            selector.addEventListener('change', (e) => {
+                selector.querySelectorAll('.unit-option').forEach(opt => opt.classList.remove('selected'));
+                e.target.closest('.unit-option').classList.add('selected');
+            });
+        });
+
+        // CARTESIAN CALC
+        function calcCart() {
+            const r1 = parseFloat(document.getElementById('c1_r').value) || 0;
+            const i1 = parseFloat(document.getElementById('c1_i').value) || 0;
+            const r2 = parseFloat(document.getElementById('c2_r').value) || 0;
+            const i2 = parseFloat(document.getElementById('c2_i').value) || 0;
+
+            const v1 = cart2pol(r1, i1);
+            const v2 = cart2pol(r2, i2);
+
+            set('c1_mod', v1.mod);
+            set('c1_ph', v1.ph + '°');
+            set('c1_q', getQuad(r1, i1));
+
+            set('c2_mod', v2.mod);
+            set('c2_ph', v2.ph + '°');
+            set('c2_q', getQuad(r2, i2));
+
+            // Operations
+            const sumR = r1 + r2, sumI = i1 + i2;
+            const vSum = cart2pol(sumR, sumI);
+            set('c_sum_r', round(sumR));
+            set('c_sum_i', round(sumI));
+            set('c_sum_m', vSum.mod);
+            set('c_sum_p', vSum.ph + '°');
+
+            const subR = r1 - r2, subI = i1 - i2;
+            const vSub = cart2pol(subR, subI);
+            set('c_sub_r', round(subR));
+            set('c_sub_i', round(subI));
+            set('c_sub_m', vSub.mod);
+            set('c_sub_p', vSub.ph + '°');
+
+            const mulMod = v1.mod * v2.mod;
+            const mulPh = v1.ph + v2.ph;
+            const vMul = pol2cart(mulMod, mulPh);
+            set('c_mul_r', vMul.r);
+            set('c_mul_i', vMul.i);
+            set('c_mul_m', round(mulMod));
+            set('c_mul_p', round(mulPh) + '°');
+
+            const divMod = v2.mod === 0 ? 0 : v1.mod / v2.mod;
+            const divPh = v1.ph - v2.ph;
+            const vDiv = pol2cart(divMod, divPh);
+            set('c_div_r', vDiv.r);
+            set('c_div_i', vDiv.i);
+            set('c_div_m', round(divMod));
+            set('c_div_p', round(divPh) + '°');
+        }
+
+        // POLAR CALC
+        function calcPolar() {
+            const m1 = parseFloat(document.getElementById('p1_mod').value) || 0;
+            const p1 = parseFloat(document.getElementById('p1_ph').value) || 0;
+            const m2 = parseFloat(document.getElementById('p2_mod').value) || 0;
+            const p2 = parseFloat(document.getElementById('p2_ph').value) || 0;
+
+            const v1 = pol2cart(m1, p1);
+            const v2 = pol2cart(m2, p2);
+
+            set('p1_r', v1.r);
+            set('p1_i', v1.i);
+            set('p1_q', getQuad(v1.r, v1.i));
+
+            set('p2_r', v2.r);
+            set('p2_i', v2.i);
+            set('p2_q', getQuad(v2.r, v2.i));
+
+            // Operations
+            const sumR = v1.r + v2.r, sumI = v1.i + v2.i;
+            const vSum = cart2pol(sumR, sumI);
+            set('p_sum_r', round(sumR));
+            set('p_sum_i', round(sumI));
+            set('p_sum_m', vSum.mod);
+            set('p_sum_p', vSum.ph + '°');
+
+            const subR = v1.r - v2.r, subI = v1.i - v2.i;
+            const vSub = cart2pol(subR, subI);
+            set('p_sub_r', round(subR));
+            set('p_sub_i', round(subI));
+            set('p_sub_m', vSub.mod);
+            set('p_sub_p', vSub.ph + '°');
+
+            const mulMod = m1 * m2;
+            const mulPh = p1 + p2;
+            const vMul = pol2cart(mulMod, mulPh);
+            set('p_mul_r', vMul.r);
+            set('p_mul_i', vMul.i);
+            set('p_mul_m', round(mulMod));
+            set('p_mul_p', round(mulPh) + '°');
+
+            const divMod = m2 === 0 ? 0 : m1 / m2;
+            const divPh = p1 - p2;
+            const vDiv = pol2cart(divMod, divPh);
+            set('p_div_r', vDiv.r);
+            set('p_div_i', vDiv.i);
+            set('p_div_m', round(divMod));
+            set('p_div_p', round(divPh) + '°');
+        }
+
+        // IMPEDANCE CALC
+        function calcImp() {
+            const r1 = parseFloat(document.getElementById('z1_r').value) || 0;
+            const x1 = parseFloat(document.getElementById('z1_x').value) || 0;
+            const r2 = parseFloat(document.getElementById('z2_r').value) || 0;
+            const x2 = parseFloat(document.getElementById('z2_x').value) || 0;
+
+            const z1 = cart2pol(r1, x1);
+            const z2 = cart2pol(r2, x2);
+
+            set('z1_mod', z1.mod);
+            set('z1_ph', z1.ph + '°');
+            set('z2_mod', z2.mod);
+            set('z2_ph', z2.ph + '°');
+
+            // Serie
+            const rs = r1 + r2, xs = x1 + x2;
+            const zs = cart2pol(rs, xs);
+            set('zs_r', round(rs));
+            set('zs_x', round(xs));
+            set('zs_mod', zs.mod);
+            set('zs_ph', zs.ph + '°');
+
+            // Parallelo
+            const prodMod = z1.mod * z2.mod;
+            const prodPh = z1.ph + z2.ph;
+            if (zs.mod === 0) {
+                set('zp_r', 0); set('zp_x', 0); set('zp_mod', 0); set('zp_ph', '0°');
+            } else {
+                const zpMod = prodMod / zs.mod;
+                const zpPh = prodPh - zs.ph;
+                const zp = pol2cart(zpMod, zpPh);
+                set('zp_r', zp.r);
+                set('zp_x', zp.i);
+                set('zp_mod', round(zpMod));
+                set('zp_ph', round(zpPh) + '°');
+            }
+        }
+
+        // REACTANCE CALC
+        function calcReact() {
+            const L = parseFloat(document.getElementById('L_val').value) || 0;
+            const fXL = parseFloat(document.getElementById('f_xl').value) || 0;
+            const lUnit = document.querySelector('input[name="l_unit"]:checked').value;
+
+            let LH = L;
+            if (lUnit === 'mH') LH = L * 1e-3;
+            if (lUnit === 'µH') LH = L * 1e-6;
+
+            const omegaXL = 2 * Math.PI * fXL;
+            const XL = omegaXL * LH;
+
+            set('xl_res', round(XL, 3));
+            set('omega_xl', round(omegaXL, 3));
+
+            const C = parseFloat(document.getElementById('C_val').value) || 0;
+            const fXC = parseFloat(document.getElementById('f_xc').value) || 0;
+            const cUnit = document.querySelector('input[name="c_unit"]:checked').value;
+
+            let CF = C;
+            if (cUnit === 'mF') CF = C * 1e-3;
+            if (cUnit === 'µF') CF = C * 1e-6;
+            if (cUnit === 'nF') CF = C * 1e-9;
+            if (cUnit === 'pF') CF = C * 1e-12;
+
+            const omegaXC = 2 * Math.PI * fXC;
+            const XC = CF === 0 ? 0 : 1 / (omegaXC * CF);
+
+            set('xc_res', round(XC, 3));
+            set('omega_xc', round(omegaXC, 3));
+        }
+
+        // L AND C CALC
+        function calcLC() {
+            const XL = parseFloat(document.getElementById('xl_in').value) || 0;
+            const fL = parseFloat(document.getElementById('f_l').value) || 0;
+            const lOutUnit = document.querySelector('input[name="l_out_unit"]:checked').value;
+
+            const omegaL = 2 * Math.PI * fL;
+            const LH = omegaL === 0 ? 0 : XL / omegaL;
+
+            let LDisp = LH, LUnit = 'H';
+            if (lOutUnit === 'mH') { LDisp = LH * 1e3; LUnit = 'mH'; }
+            if (lOutUnit === 'µH') { LDisp = LH * 1e6; LUnit = 'µH'; }
+
+            set('l_res', round(LDisp, 6) + ' ' + LUnit);
+            set('omega_l', round(omegaL, 3));
+
+            const XC = parseFloat(document.getElementById('xc_in').value) || 0;
+            const fC = parseFloat(document.getElementById('f_c').value) || 0;
+            const cOutUnit = document.querySelector('input[name="c_out_unit"]:checked').value;
+
+            const omegaC = 2 * Math.PI * fC;
+            const CF = (omegaC === 0 || XC === 0) ? 0 : 1 / (omegaC * XC);
+
+            let CDisp = CF, CUnit = 'F';
+            if (cOutUnit === 'mF') { CDisp = CF * 1e3; CUnit = 'mF'; }
+            if (cOutUnit === 'µF') { CDisp = CF * 1e6; CUnit = 'µF'; }
+            if (cOutUnit === 'nF') { CDisp = CF * 1e9; CUnit = 'nF'; }
+            if (cOutUnit === 'pF') { CDisp = CF * 1e12; CUnit = 'pF'; }
+
+            set('c_res', round(CDisp, 6) + ' ' + CUnit);
+            set('omega_c', round(omegaC, 3));
+        }
+
+        // STAR-DELTA CALC
+        function calcStar() {
+            const r1 = parseFloat(document.getElementById('zy1_r').value) || 0;
+            const x1 = parseFloat(document.getElementById('zy1_x').value) || 0;
+            const r2 = parseFloat(document.getElementById('zy2_r').value) || 0;
+            const x2 = parseFloat(document.getElementById('zy2_x').value) || 0;
+            const r3 = parseFloat(document.getElementById('zy3_r').value) || 0;
+            const x3 = parseFloat(document.getElementById('zy3_x').value) || 0;
+
+            const z1 = cart2pol(r1, x1);
+            const z2 = cart2pol(r2, x2);
+            const z3 = cart2pol(r3, x3);
+
+            set('zy1_mod', z1.mod); set('zy1_ph', z1.ph + '°');
+            set('zy2_mod', z2.mod); set('zy2_ph', z2.ph + '°');
+            set('zy3_mod', z3.mod); set('zy3_ph', z3.ph + '°');
+
+            // Products
+            const p12r = r1*r2 - x1*x2, p12i = r1*x2 + x1*r2;
+            const p23r = r2*r3 - x2*x3, p23i = r2*x3 + x2*r3;
+            const p31r = r3*r1 - x3*x1, p31i = r3*x1 + x3*r1;
+
+            const numR = p12r + p23r + p31r;
+            const numI = p12i + p23i + p31i;
+
+            // Zd1 = num / z3
+            const denom3 = r3*r3 + x3*x3;
+            const zd1r = denom3 === 0 ? 0 : round((numR*r3 + numI*x3) / denom3);
+            const zd1i = denom3 === 0 ? 0 : round((numI*r3 - numR*x3) / denom3);
+            const zd1 = cart2pol(zd1r, zd1i);
+            set('zd1_r', zd1r); set('zd1_x', zd1i); set('zd1_mod', zd1.mod); set('zd1_ph', zd1.ph + '°');
+
+            // Zd2 = num / z1
+            const denom1 = r1*r1 + x1*x1;
+            const zd2r = denom1 === 0 ? 0 : round((numR*r1 + numI*x1) / denom1);
+            const zd2i = denom1 === 0 ? 0 : round((numI*r1 - numR*x1) / denom1);
+            const zd2 = cart2pol(zd2r, zd2i);
+            set('zd2_r', zd2r); set('zd2_x', zd2i); set('zd2_mod', zd2.mod); set('zd2_ph', zd2.ph + '°');
+
+            // Zd3 = num / z2
+            const denom2 = r2*r2 + x2*x2;
+            const zd3r = denom2 === 0 ? 0 : round((numR*r2 + numI*x2) / denom2);
+            const zd3i = denom2 === 0 ? 0 : round((numI*r2 - numR*x2) / denom2);
+            const zd3 = cart2pol(zd3r, zd3i);
+            set('zd3_r', zd3r); set('zd3_x', zd3i); set('zd3_mod', zd3.mod); set('zd3_ph', zd3.ph + '°');
+        }
+
+        // MODAL INFO
+        const infoContent = {
+            cart: `
+                <h3>Spiegazione</h3>
+                <p>La conversione da forma <strong>cartesiana</strong> a <strong>polare</strong> trasforma un numero complesso da <strong>a + bi</strong> a <strong>ρ∠φ</strong>.</p>
+                <div class="formula-box">
+                    <strong>Modulo:</strong> ρ = √(a² + b²)<br>
+                    <strong>Fase:</strong> φ = arctan(b/a) [con correzione quadrante]
+                </div>
+                <h3>Esempio</h3>
+                <div class="example-box">
+                    <div class="example-title">Converti 3 + 4i</div>
+                    <p><strong>Modulo:</strong> ρ = √(9 + 16) = 5</p>
+                    <p><strong>Fase:</strong> φ = arctan(4/3) = 53.13°</p>
+                    <p><strong>Risultato:</strong> 5∠53.13°</p>
+                </div>
+            `,
+            polar: `
+                <h3>Spiegazione</h3>
+                <p>La conversione da forma <strong>polare</strong> a <strong>cartesiana</strong> trasforma <strong>ρ∠φ</strong> in <strong>a + bi</strong>.</p>
+                <div class="formula-box">
+                    <strong>Parte Reale:</strong> a = ρ × cos(φ)<br>
+                    <strong>Parte Immaginaria:</strong> b = ρ × sin(φ)
+                </div>
+                <h3>Esempio</h3>
+                <div class="example-box">
+                    <div class="example-title">Converti 10∠30°</div>
+                    <p><strong>Reale:</strong> a = 10 × cos(30°) = 8.66</p>
+                    <p><strong>Immag:</strong> b = 10 × sin(30°) = 5</p>
+                    <p><strong>Risultato:</strong> 8.66 + 5i</p>
+                </div>
+            `,
+            imp: `
+                <h3>Spiegazione</h3>
+                <p>L'<strong>impedenza</strong> (Z) è l'opposizione al passaggio di corrente AC, composta da resistenza R (parte reale) e reattanza X (parte immaginaria).</p>
+                <div class="formula-box">
+                    <strong>Serie:</strong> Zs = Z₁ + Z₂<br>
+                    <strong>Parallelo:</strong> Zp = (Z₁ × Z₂) / (Z₁ + Z₂)
+                </div>
+                <h3>Esempio</h3>
+                <div class="example-box">
+                    <div class="example-title">Z₁ = 10+j5 Ω, Z₂ = 5+j10 Ω</div>
+                    <p><strong>Serie:</strong> Zs = 15+j15 Ω, |Zs| = 21.21 Ω</p>
+                </div>
+            `,
+            react: `
+                <h3>Spiegazione</h3>
+                <p>Le <strong>reattanze</strong> sono l'opposizione offerta da induttori (XL) e condensatori (XC) alla corrente AC.</p>
+                <div class="formula-box">
+                    <strong>XL:</strong> XL = 2πfL = ωL<br>
+                    <strong>XC:</strong> XC = 1/(2πfC) = 1/(ωC)
+                </div>
+                <h3>Esempio</h3>
+                <div class="example-box">
+                    <div class="example-title">L = 10 mH, f = 50 Hz</div>
+                    <p><strong>XL:</strong> 2π × 50 × 0.01 = 3.14 Ω</p>
+                </div>
+            `,
+            lc: `
+                <h3>Spiegazione</h3>
+                <p>Partendo dalla reattanza misurata, è possibile calcolare l'induttanza L o la capacità C.</p>
+                <div class="formula-box">
+                    <strong>L:</strong> L = XL / (2πf)<br>
+                    <strong>C:</strong> C = 1 / (2πf × XC)
+                </div>
+                <h3>Esempio</h3>
+                <div class="example-box">
+                    <div class="example-title">XL = 31.4 Ω, f = 50 Hz</div>
+                    <p><strong>L:</strong> 31.4 / (2π × 50) = 0.1 H = 100 mH</p>
+                </div>
+            `,
+            star: `
+                <h3>Spiegazione</h3>
+                <p>La conversione <strong>Stella-Triangolo</strong> trasforma tre impedenze collegate a stella (Y) in una configurazione equivalente a triangolo (Δ).</p>
+                <div class="formula-box">
+                    Zd₁ = (Zy₁×Zy₂ + Zy₂×Zy₃ + Zy₃×Zy₁) / Zy₃<br>
+                    Zd₂ = (Zy₁×Zy₂ + Zy₂×Zy₃ + Zy₃×Zy₁) / Zy₁<br>
+                    Zd₃ = (Zy₁×Zy₂ + Zy₂×Zy₃ + Zy₃×Zy₁) / Zy₂
+                </div>
+                <h3>Esempio</h3>
+                <div class="example-box">
+                    <div class="example-title">Stella equilibrata: Zy = 10 Ω</div>
+                    <p><strong>Regola:</strong> Zd = 3 × Zy = 30 Ω</p>
+                </div>
+            `,
+            mul: `
+                <h3>Spiegazione - PRODOTTO tra Vettori</h3>
+                <p>Il <strong>prodotto</strong> tra due numeri complessi può essere calcolato in due modi:</p>
+                
+                <h3>Metodo 1: Forma Polare (PIÙ FACILE)</h3>
+                <div class="formula-box">
+                    <strong>Regola:</strong><br>
+                    • Moduli: si MOLTIPLICANO<br>
+                    • Fasi: si SOMMANO<br><br>
+                    (ρ₁∠φ₁) × (ρ₂∠φ₂) = (ρ₁ × ρ₂)∠(φ₁ + φ₂)
+                </div>
+                
+                <h3>Metodo 2: Forma Cartesiana</h3>
+                <div class="formula-box">
+                    <strong>Formula:</strong> (a+bi) × (c+di) = (ac-bd) + (ad+bc)i<br><br>
+                    <strong>Ricorda:</strong> i² = -1
+                </div>
+
+                <h3>Esempio 1: Forma Polare</h3>
+                <div class="example-box">
+                    <div class="example-title">V₁ = 5∠30° × V₂ = 2∠45°</div>
+                    <p><strong>Modulo:</strong> 5 × 2 = 10</p>
+                    <p><strong>Fase:</strong> 30° + 45° = 75°</p>
+                    <p><strong>Risultato:</strong> 10∠75°</p>
+                </div>
+
+                <h3>Esempio 2: Forma Cartesiana</h3>
+                <div class="example-box">
+                    <div class="example-title">V₁ = 3+4i × V₂ = 1+2i</div>
+                    <p><strong>Reale:</strong> (3×1) - (4×2) = 3 - 8 = <strong>-5</strong></p>
+                    <p><strong>Immag:</strong> (3×2) + (4×1) = 6 + 4 = <strong>10</strong></p>
+                    <p><strong>Risultato:</strong> -5 + 10i</p>
+                </div>
+
+                <h3>ATTENZIONE</h3>
+                <div class="example-box" style="background: #fff2cc; border-left: 4px solid #ffc000;">
+                    <p><strong>Se V₂ = 0:</strong> qualsiasi numero × 0 = <strong>0</strong></p>
+                    <p>Per vedere un risultato diverso da zero, inserisci valori per <strong>entrambi i vettori</strong>!</p>
+                </div>
+            `,
+            div: `
+                <h3>Spiegazione - DIVISIONE tra Vettori</h3>
+                <p>La <strong>divisione</strong> tra due numeri complessi può essere calcolata in due modi:</p>
+                
+                <h3>Metodo 1: Forma Polare (PIÙ FACILE)</h3>
+                <div class="formula-box">
+                    <strong>Regola:</strong><br>
+                    • Moduli: si DIVIDONO<br>
+                    • Fasi: si SOTTRAGGONO<br><br>
+                    (ρ₁∠φ₁) ÷ (ρ₂∠φ₂) = (ρ₁ ÷ ρ₂)∠(φ₁ - φ₂)
+                </div>
+                
+                <h3>Metodo 2: Forma Cartesiana</h3>
+                <div class="formula-box">
+                    <strong>Formula:</strong> (a+bi) ÷ (c+di) = [(ac+bd) + (bc-ad)i] / (c²+d²)<br><br>
+                    <strong>Si moltiplica</strong> per il coniugato del denominatore
+                </div>
+
+                <h3>Esempio 1: Forma Polare</h3>
+                <div class="example-box">
+                    <div class="example-title">V₁ = 10∠75° ÷ V₂ = 2∠45°</div>
+                    <p><strong>Modulo:</strong> 10 ÷ 2 = 5</p>
+                    <p><strong>Fase:</strong> 75° - 45° = 30°</p>
+                    <p><strong>Risultato:</strong> 5∠30°</p>
+                </div>
+
+                <h3>Esempio 2: Forma Cartesiana</h3>
+                <div class="example-box">
+                    <div class="example-title">V₁ = 3+4i ÷ V₂ = 1+2i</div>
+                    <p><strong>Denomin.:</strong> c²+d² = 1²+2² = 5</p>
+                    <p><strong>Reale:</strong> [(3×1)+(4×2)] ÷ 5 = 11 ÷ 5 = <strong>2.2</strong></p>
+                    <p><strong>Immag:</strong> [(4×1)-(3×2)] ÷ 5 = -2 ÷ 5 = <strong>-0.4</strong></p>
+                    <p><strong>Risultato:</strong> 2.2 - 0.4i</p>
+                </div>
+
+                <h3>ATTENZIONE</h3>
+                <div class="example-box" style="background: #fff2cc; border-left: 4px solid #ffc000;">
+                    <p><strong>Se V₂ = 0:</strong> la divisione è <strong>IMPOSSIBILE</strong> (divisione per zero)</p>
+                    <p>Il calcolatore mostra 0 per evitare errori, ma matematicamente è <strong>indefinito</strong>.</p>
+                    <p>Inserisci valori per <strong>entrambi i vettori</strong> per ottenere risultati corretti!</p>
+                </div>
+            `
+        };
+
+        function showInfo(tab) {
+            document.getElementById('modalTitle').textContent = 'ℹ️ Informazioni';
+            document.getElementById('modalBody').innerHTML = infoContent[tab] || '<p>Informazioni non disponibili.</p>';
+            document.getElementById('modalInfo').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modalInfo').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalInfo');
+            if (event.target === modal) closeModal();
+        };
+
+        // INIT
+        document.addEventListener('DOMContentLoaded', function() {
+            calcCart();
+            calcPolar();
+            calcImp();
+            calcReact();
+            calcLC();
+            calcStar();
+            
+            // Registra Service Worker per PWA
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js')
+                        .then(registration => {
+                            console.log('Service Worker registrato con successo:', registration.scope);
+                        })
+                        .catch(error => {
+                            console.log('Registrazione Service Worker fallita:', error);
+                        });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

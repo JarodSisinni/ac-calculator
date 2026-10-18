@@ -1,6 +1,6 @@
 const CACHE_NAME = 'ac-calculator-v1';
 const urlsToCache = [
-  './ConversioneVettori.html',
+  './index.html',
   './manifest.json',
   './icon.svg'
 ];

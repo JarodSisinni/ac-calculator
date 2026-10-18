@@ -2,7 +2,7 @@
   "name": "AC Calculator - Vettori Elettrotecnica",
   "short_name": "AC Calculator",
   "description": "Calcolatore professionale per conversioni vettoriali AC - I.S.I.S. A. Malignani",
-  "start_url": "./ConversioneVettori.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#217346",
   "theme_color": "#217346",
